@@ -8,7 +8,7 @@
 #include "stm32f4xx_exti.h"
 
 void Conf_GPIO() {
-	/* piny sterujace kierunkiem silników */
+	/* piny sterujace kierunkiem silnika */
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -67,10 +67,16 @@ void Conf_PWM() {
 	GPIO_SetBits(GPIOB, GPIO_Pin_8);
 }
 
-void serwo_w_lewo(){ TIM4->CCR3 = 1550; }
-void serwo_w_prawo(){ TIM4->CCR3 = 950; }
-void serwo_standard(){ TIM4->CCR3 = 1250; }
+void serwo_w_prawo(){ TIM4->CCR3 = 1500; }
+void serwo_w_lewo(){ TIM4->CCR3 = 900; }
+void serwo_standard(){ TIM4->CCR3 = 1200; }
 
+void silnik_przod(volatile uint16_t speed){
+
+	TIM4->CCR2 = speed;
+	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+	GPIO_ResetBits(GPIOE, GPIO_Pin_9);
+}
 int main(void)
 {
 	SystemInit();
@@ -85,13 +91,15 @@ int main(void)
 
 	while(1)
 	{
-		serwo_standard();
-		for (int i = 0; i < 10000000; i++){}
-		serwo_w_lewo();
-		for (int i = 0; i < 10000000; i++){}
+		silnik_przod(40000);
 		serwo_standard();
 		for (int i = 0; i < 10000000; i++){}
 		serwo_w_prawo();
 		for (int i = 0; i < 10000000; i++){}
+		serwo_standard();
+		for (int i = 0; i < 10000000; i++){}
+		serwo_w_lewo();
+		for (int i = 0; i < 10000000; i++){}
+
 	}
 }
